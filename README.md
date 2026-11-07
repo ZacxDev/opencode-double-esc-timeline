@@ -43,10 +43,6 @@ A keybind cannot express it: `escape` is a single bound key, and a keymap *seque
 
 ### npm
 
-> **Status: the package is prepared but not yet published to npm.** Until it is,
-> use the Nix flake or the manual install below. Once published, this is the
-> install:
-
 ```json title="cli.json"
 {
   "plugins": ["opencode-double-esc-timeline"]
