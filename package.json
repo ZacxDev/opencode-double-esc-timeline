@@ -1,6 +1,6 @@
 {
   "name": "opencode-double-esc-timeline",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Double-tap Escape in opencode to open the session timeline — the messages you sent. Claude Code's double-Esc message history, as an opencode plugin (no fork).",
   "type": "module",
   "license": "MIT",
