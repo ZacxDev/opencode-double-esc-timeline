@@ -24,7 +24,22 @@
           mkdir -p $out
           install -m644 ${./src/tui.ts} $out/tui.ts
           install -m644 ${./src/index.ts} $out/index.ts
-          install -m644 ${./package.json} $out/package.json
+          # 🔴 package.local.json, NOT the repo's package.json.
+          #
+          # The repo's package.json is the NPM manifest: its `exports` map points
+          # at ./dist/*.js (present in the published tarball, absent in this
+          # directory, which installs the TypeScript sources).
+          #
+          # opencode resolves the parts of a LOCAL plugin directory through its
+          # package.json ONLY when that file carries BOTH a `name` and an
+          # `exports` map — otherwise it falls back to the root file names
+          # (tui, index), which is the layout here. See opencode
+          # packages/plugin/src/host.ts `resolve` (2.3.x). Shipping the NPM
+          # manifest into this directory therefore makes BOTH entrypoints
+          # resolve to nothing and opencode fails with "Plugin entrypoint not
+          # found" — the plugin silently never loads. package.local.json is that
+          # manifest minus `exports`, so the loader uses tui.ts / index.ts.
+          install -m644 ${./package.local.json} $out/package.json
           install -m644 ${./README.md} $out/README.md
         '';
       });

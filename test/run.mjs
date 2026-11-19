@@ -165,6 +165,26 @@ async function main() {
       "TIMELINE_COMMAND assignment pins the host command id",
       new RegExp(`^const TIMELINE_COMMAND = "${TIMELINE_COMMAND.replace(/\./g, "\\.")}"$`, "m").test(source),
     )
+
+    // 🔴 INVARIANT GUARD ON THE DEPLOY LAYOUT — NOT regression coverage. It does
+    // not run opencode's loader. It pins the ONE property a LOCAL plugin
+    // directory needs for opencode (2.3.x, packages/plugin/src/host.ts
+    // `resolve`) to find its parts: a package.json WITHOUT an `exports` map, so
+    // the loader falls back to the root file names (tui.ts, index.ts). The
+    // repo's own package.json is the NPM manifest (exports -> ./dist/*.js,
+    // which this directory does not ship) and must NOT be the one the flake
+    // installs into the directory — shipping it makes BOTH entrypoints resolve
+    // to nothing and opencode fails with "Plugin entrypoint not found".
+    const flake = await readFile(path.join(ROOT, "flake.nix"), "utf8")
+    check(
+      "flake.nix installs the TS sources + no-exports manifest, never the npm manifest",
+      flake.includes('${./package.local.json}') && !flake.includes('${./package.json}'),
+    )
+    const localManifest = JSON.parse(await readFile(path.join(ROOT, "package.local.json"), "utf8"))
+    check(
+      "package.local.json has no exports map and keeps type=module",
+      localManifest.exports === undefined && localManifest.type === "module",
+    )
   } finally {
     await rm(tmp, { recursive: true, force: true })
   }
